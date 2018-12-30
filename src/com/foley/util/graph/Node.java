@@ -1,5 +1,7 @@
 package com.foley.util.graph;
 
+import java.util.Objects;
+
 /**
  * A node in the graph
  *
@@ -8,41 +10,54 @@ package com.foley.util.graph;
  * @version 26 Dec 2018
  */
 public class Node<T extends Comparable<T>> implements Comparable<Node<T>> {
-    private int id;
     private T t;
-
-    public static int NODE_COUNT = 0;
 
     /**
      * Creates a new node
      *
-     * @param t The payload of the node
+     * @param t The data of the node
      */
     public Node(T t) {
-        this.id = NODE_COUNT++;
         this.t = t;
     }
 
     /**
-     * Gets the data payload
+     * Gets the data
      *
-     * @return The data payload
+     * @return The data
      */
-    public T getPayload() {
+    public T getData() {
         return t;
     }
 
+    @Override
     /**
-     * Gets the id of the node
+     * Determines if two objects are equal
      *
-     * @return The node id
+     * @param o The object to equate to
+     * @return True if the objects are equal
      */
-    public int getID() {
-        return id;
+    public boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
+        Node<?> node = (Node<?>) o;
+        return Objects.equals(t, node.t);
+    }
+
+    @Override
+    /**
+     * Computes the hash code
+     *
+     * @return The hash code
+     */
+    public int hashCode() {
+        return Objects.hash(t);
     }
 
     /**
-     * Compares this node to another based on their payload
+     * Compares this node to another based on their data
      *
      * @param n The node to compare with
      * @return The resulting comparison

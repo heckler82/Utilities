@@ -1,177 +1,73 @@
 package com.foley.util.graph;
 
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
- * A collection of vertices and the edges connecting them
+ * A collection of nodes and the edges connecting them
  *
  * @param <T> The type of the graph
  * @author Evan Foley
  * @version 26 Dec 2018
  */
 public class Graph<T extends Comparable<T>> {
-    // Stores nodes by their id
-    private Map<Integer, Node<T>> nodeID;
-    // Stores nodes by their payload
-    private Map<T, Node<T>> nodePayload;
-    // The graph root node
-    private Node<T> root;
-    // Adjacency list, value < zero is not connected
-    private int[][] adjacency;
-    // Directional flag
+    private Map<T, Node<T>> nodes;
+    private Map<Node<T>, Map<Node<T>, Integer>> edges;
     private boolean isDirected;
 
     /**
-     * Creates a new undirected graph
+     * Creates a new graph
      */
-    private Graph() {
-        nodeID = new HashMap<>();
-        nodePayload = new HashMap<>();
-        adjacency = new int[10][10];
-        // All costs to each node default to -1
-        for(int[] arr : adjacency) {
-            Arrays.fill(arr, -1);
-        }
+    public Graph() {
+        nodes = new HashMap<>();
+        edges = new HashMap<>();
         isDirected = false;
     }
 
     /**
-     * Creates a new undirected graph and sets the root to the given node
+     * Creates a new graph
      *
-     * @param n The root node
-     */
-    public Graph(Node<T> n) {
-        this(n, false);
-    }
-
-    /**
-     * Creates a new graph specified to be directed or undirected, and sets the root to the given node
-     *
-     * @param n The root node
      * @param isDirected True for a directed graph
      */
-    public Graph(Node<T> n, boolean isDirected) {
+    public Graph(boolean isDirected) {
         this();
-        nodeID.put(n.getID(), n);
-        nodePayload.put(n.getPayload(), n);
-        this.root = n;
         this.isDirected = isDirected;
     }
 
     /**
-     * Sets the root for the graph
+     * Adds a node to the graph
      *
-     * @param n The root node
-     */
-    public void setRoot(Node<T> n) {
-        if(nodeID.containsKey(n.getID())) {
-            root = nodeID.get(n.getID());
-            return;
-        }
-        addNode(n);
-        root = n;
-    }
-
-    /**
-     * Gets the root node of the graph
-     *
-     * @return The root node of the graph
-     */
-    public Node<T> getRoot() {
-        return root;
-    }
-
-    /**
-     * Adds a node to the graph. Expands the adjacency list when necessary
-     *
-     * @param n The node to add
-     * @return True if the vertex was successfully added
+     * @param n The node
+     * @return True if the node was added
      */
     public boolean addNode(Node<T> n) {
-        if(nodeID.containsKey(n.getID())) {
-            return false;
+        if(!nodes.containsKey(n.getData())) {
+            nodes.put(n.getData(), n);
+            // Add the edge entry for the node
+            edges.put(n, new HashMap<>());
+            return true;
         }
-        nodeID.put(n.getID(), n);
-        nodePayload.put(n.getPayload(), n);
-        // If necessary, expand adjacency list
-        if(nodeID.keySet().size() >= adjacency.length) {
-            adjacency = expandAdjacencyList();
-        }
-        // Set the node distance to itself to zero
-        adjacency[n.getID()][n.getID()] = 0;
-        return true;
+        return false;
     }
 
     /**
-     * Gets a node from the graph based on its payload
+     * Removes a node from the graph
      *
-     * @param t The payload of the node to get
-     * @return The node associated with the passed payload
+     * @param n The node to remove
+     * @return True if the node was removed
      */
-    public Node<T> getNode(T t) {
-        return nodePayload.get(t);
-    }
-
-    /**
-     * Gets a node from the graph based on its id
-     *
-     * @param i The id of the node
-     * @return The node associated with the id
-     */
-    public Node<T> getNode(int i) {
-        return nodeID.get(i);
-    }
-
-    /**
-     * Gets all the nodes that are connected to the specified node
-     *
-     * @param n The parent node
-     * @return The list of connected nodes
-     */
-    public List<Integer> getConnectedNodes(Node<T> n) {
-        // Verify node id is within bounds
-        if(n.getID() > -1 && n.getID() < nodeID.keySet().size()) {
-            ArrayList<Integer> list = new ArrayList<>();
-            for(int i : adjacency[n.getID()]) {
-                if(i > -1) {
-                    list.add(i);
-                }
-            }
-            return list;
-        }
-        return new ArrayList<Integer>();
-    }
-
-    /**
-     * Adds an edge between the two specified nodes
-     *
-     * @param from The source node
-     * @param to The destination node
-     * @return True if the edge was successfully added
-     */
-    public boolean addEdge(Node<T> from, Node<T> to) {
-        return addEdge(from, to, 0);
-    }
-
-    /**
-     * Adds an edge between the two specified nodes with the specified cost. An already existing edge will be overridden
-     *
-     * @param from The source node
-     * @param to The destination node
-     * @param cost The cost to travel along the edge
-     * @return True if the edge was successfully added
-     */
-    public boolean addEdge(Node<T> from, Node<T> to, int cost) {
-        // Only add the edge if both nodes exist in the graph
-        if(nodeID.get(from.getID()) != null && nodeID.get(to.getID()) != null) {
-            adjacency[from.getID()][to.getID()] = cost;
-            // If graph is undirected then two edges will be added
-            if(!isDirected) {
-                adjacency[to.getID()][from.getID()] = cost;
+    public boolean removeNode(Node<T> n) {
+        if(nodes.containsKey(n.getData())) {
+            nodes.remove(n.getData());
+            // Remove the edge entry for the node
+            Set<Node<T>> set = edges.get(n).keySet();
+            edges.remove(n);
+            // Remove the edges to all nodes that were connected to the node
+            for(Node<T> node : set) {
+                edges.get(node).remove(n);
             }
             return true;
         }
@@ -179,16 +75,110 @@ public class Graph<T extends Comparable<T>> {
     }
 
     /**
-     * Tests if there is an edge between the source and the destination node
+     * Adds an edge to the graph. If graph is not directed, will also add the edge from the destination node
+     * to the source node. Will only return the result of adding the edge from the source to the destination
      *
-     * @param from The source node
-     * @param to The destination node
-     * @return True if an edge exists between two nodes
+     * @param source The source node
+     * @param dest The destination node
+     * @return True if the edge was added between source and dest
      */
-    public boolean areNodesConnected(Node<T> from, Node<T> to) {
-        // Only test if both nodes exist in the graph
-        if(nodeID.get(from.getID()) != null && nodeID.get(to.getID()) != null) {
-            return adjacency[from.getID()][to.getID()] > -1;
+    public boolean addEdge(Node<T> source, Node<T> dest) {
+        boolean added = addEdgeInternal(source, dest, 1);
+        if(!isDirected) {
+            addEdgeInternal(dest, source, 1);
+        }
+        return added;
+    }
+
+    /**
+     * Adds an edge to the graph with the specified cost. If graph is not directed, will also add the edge from the
+     * destination node to the source node. Will only return the result of adding the edge from the source to the
+     * destination
+     *
+     * @param source The source node
+     * @param dest The destination node
+     * @param cost The cost to travel along the edge
+     * @return True if the edge was added between source and dest
+     */
+    public boolean addEdge(Node<T> source, Node<T> dest, int cost) {
+        boolean added = addEdgeInternal(source, dest, cost);
+        if(!isDirected) {
+            addEdgeInternal(dest, source, cost);
+        }
+        return added;
+    }
+
+    /**
+     * Removes an edge from the graph
+     *
+     * @param source The source node
+     * @param dest The destination node
+     * @return True if the edge was removed
+     */
+    public boolean removeEdge(Node<T> source, Node<T> dest) {
+        if(nodes.containsKey(source.getData()) && nodes.containsKey(dest.getData())) {
+            edges.get(source).remove(dest);
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Determines if two nodes are adjacent to each other. Only determines if an edge starting from source goes 
+     * to dest. Will not test for the other direction.
+     * 
+     * @param source The source node
+     * @param dest The destination node
+     * @return True if the nodes are adjacent to each other
+     */
+    public boolean areAdjacent(Node<T> source, Node<T> dest) {
+        if(nodes.containsKey(source.getData()) && nodes.containsKey(dest.getData())) {
+            return edges.get(source).containsKey(dest);
+        }
+        return false;
+    }
+
+    /**
+     * Gets the nodes connected to the passed node
+     * @param n The node
+     * @return
+     */
+    public Collection<Node<T>> getNeighbors(Node<T> n) {
+        if(nodes.containsKey(n.getData())) {
+            return edges.get(n).keySet();
+        }
+        return new ArrayList<>();
+    }
+
+    /**
+     * Gets the cost to travel along an edge in the graph
+     *
+     * @param source The source node
+     * @param dest The destination node
+     * @return The cost to travel along the edge
+     */
+    public int getEdgeCost(Node<T> source, Node<T> dest) {
+        if(nodes.containsKey(source.getData()) && nodes.containsKey(dest.getData())) {
+            return edges.get(source).getOrDefault(dest, -1);
+        }
+        return -1;
+    }
+
+    /**
+     * Adds an edge to the graph
+     *
+     * @param source The source node
+     * @param dest The destination node
+     * @param cost The cost to travel along the edge
+     * @return True if the edge was added
+     */
+    private boolean addEdgeInternal(Node<T> source, Node<T> dest, int cost) {
+        if(nodes.containsKey(source.getData()) && nodes.containsKey(dest.getData())) {
+            Map<Node<T>, Integer> map = edges.get(source);
+            if(!map.containsKey(dest)) {
+                map.put(dest, cost);
+                return true;
+            }
         }
         return false;
     }
@@ -198,44 +188,7 @@ public class Graph<T extends Comparable<T>> {
      *
      * @return The number of nodes in the graph
      */
-    public int getNodeCount() {
-        return nodeID.keySet().size();
-    }
-
-    /**
-     * Finds the path from the graph root to all reachable nodes
-     *
-     * @return The search object
-     */
-    public Searchable findPaths() {
-        return findPaths(root);
-    }
-
-    /**
-     * Finds the path from the source node to all reachable nodes
-     *
-     * @param source The source node
-     * @return The search object
-     */
-    public Searchable findPaths(Node<T> source) {
-        return null;
-    }
-
-    /**
-     * Expands the adjacency list
-     *
-     * @return The new adjacency list
-     */
-    private int[][] expandAdjacencyList() {
-        // Double capacity of the adjacency list
-        int[][] newList = new int[2 * nodeID.keySet().size()][2 * nodeID.keySet().size()];
-        // For every row in the adjacency list, copy to the new one
-        for(int i = 0; i < adjacency.length; i++) {
-            int[] oldElem = adjacency[i];
-            int[] newElem = newList[i];
-            Arrays.fill(newElem, -1);
-            System.arraycopy(oldElem, 0, newElem, 0, oldElem.length);
-        }
-        return newList;
+    public int getNumberOfNodes() {
+        return nodes.keySet().size();
     }
 }
