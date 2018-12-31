@@ -14,16 +14,14 @@ import java.util.Set;
  * @version 26 Dec 2018
  */
 public class Graph<T extends Comparable<T>> {
-    private Map<T, Node<T>> nodes;
-    private Map<Node<T>, Map<Node<T>, Integer>> edges;
+    private Map<T, Map<T, Integer>> map;
     private boolean isDirected;
 
     /**
      * Creates a new graph
      */
     public Graph() {
-        nodes = new HashMap<>();
-        edges = new HashMap<>();
+        map = new HashMap<>();
         isDirected = false;
     }
 
@@ -40,14 +38,13 @@ public class Graph<T extends Comparable<T>> {
     /**
      * Adds a node to the graph
      *
-     * @param n The node
+     * @param t The node
      * @return True if the node was added
      */
-    public boolean addNode(Node<T> n) {
-        if(!nodes.containsKey(n.getData())) {
-            nodes.put(n.getData(), n);
+    public boolean addNode(T t) {
+        if(!map.containsKey(t)) {
             // Add the edge entry for the node
-            edges.put(n, new HashMap<>());
+            map.put(t, new HashMap<>());
             return true;
         }
         return false;
@@ -56,18 +53,17 @@ public class Graph<T extends Comparable<T>> {
     /**
      * Removes a node from the graph
      *
-     * @param n The node to remove
+     * @param t The node to remove
      * @return True if the node was removed
      */
-    public boolean removeNode(Node<T> n) {
-        if(nodes.containsKey(n.getData())) {
-            nodes.remove(n.getData());
+    public boolean removeNode(T t) {
+        if(map.containsKey(t)) {
             // Remove the edge entry for the node
-            Set<Node<T>> set = edges.get(n).keySet();
-            edges.remove(n);
+            Set<T> set = map.get(t).keySet();
+            map.remove(t);
             // Remove the edges to all nodes that were connected to the node
-            for(Node<T> node : set) {
-                edges.get(node).remove(n);
+            for(T nt : set) {
+                map.get(nt).remove(t);
             }
             return true;
         }
@@ -82,12 +78,15 @@ public class Graph<T extends Comparable<T>> {
      * @param dest The destination node
      * @return True if the edge was added between source and dest
      */
-    public boolean addEdge(Node<T> source, Node<T> dest) {
-        boolean added = addEdgeInternal(source, dest, 1);
-        if(!isDirected) {
-            addEdgeInternal(dest, source, 1);
+    public boolean addEdge(T source, T dest) {
+        if(map.containsKey(source) && map.containsKey(dest)) {
+            boolean added = addEdgeInternal(source, dest, 1);
+            if (!isDirected) {
+                addEdgeInternal(dest, source, 1);
+            }
+            return added;
         }
-        return added;
+        return false;
     }
 
     /**
@@ -100,12 +99,15 @@ public class Graph<T extends Comparable<T>> {
      * @param cost The cost to travel along the edge
      * @return True if the edge was added between source and dest
      */
-    public boolean addEdge(Node<T> source, Node<T> dest, int cost) {
-        boolean added = addEdgeInternal(source, dest, cost);
-        if(!isDirected) {
-            addEdgeInternal(dest, source, cost);
+    public boolean addEdge(T source, T dest, int cost) {
+        if(map.containsKey(source) && map.containsKey(dest)) {
+            boolean added = addEdgeInternal(source, dest, cost);
+            if (!isDirected) {
+                addEdgeInternal(dest, source, cost);
+            }
+            return added;
         }
-        return added;
+        return false;
     }
 
     /**
@@ -115,9 +117,12 @@ public class Graph<T extends Comparable<T>> {
      * @param dest The destination node
      * @return True if the edge was removed
      */
-    public boolean removeEdge(Node<T> source, Node<T> dest) {
-        if(nodes.containsKey(source.getData()) && nodes.containsKey(dest.getData())) {
-            edges.get(source).remove(dest);
+    public boolean removeEdge(T source, T dest) {
+        if(map.containsKey(source) && map.containsKey(dest)) {
+            map.get(source).remove(dest);
+            if(!isDirected) {
+                map.get(dest).remove(source);
+            }
             return true;
         }
         return false;
@@ -131,21 +136,21 @@ public class Graph<T extends Comparable<T>> {
      * @param dest The destination node
      * @return True if the nodes are adjacent to each other
      */
-    public boolean areAdjacent(Node<T> source, Node<T> dest) {
-        if(nodes.containsKey(source.getData()) && nodes.containsKey(dest.getData())) {
-            return edges.get(source).containsKey(dest);
+    public boolean areAdjacent(T source, T dest) {
+        if(map.containsKey(source) && map.containsKey(dest)) {
+            return map.get(source).containsKey(dest);
         }
         return false;
     }
 
     /**
      * Gets the nodes connected to the passed node
-     * @param n The node
+     * @param t The node
      * @return
      */
-    public Collection<Node<T>> getNeighbors(Node<T> n) {
-        if(nodes.containsKey(n.getData())) {
-            return edges.get(n).keySet();
+    public Collection<T> getNeighbors(T t) {
+        if(map.containsKey(t)) {
+            return map.get(t).keySet();
         }
         return new ArrayList<>();
     }
@@ -157,9 +162,9 @@ public class Graph<T extends Comparable<T>> {
      * @param dest The destination node
      * @return The cost to travel along the edge
      */
-    public int getEdgeCost(Node<T> source, Node<T> dest) {
-        if(nodes.containsKey(source.getData()) && nodes.containsKey(dest.getData())) {
-            return edges.get(source).getOrDefault(dest, -1);
+    public int getEdgeCost(T source, T dest) {
+        if(map.containsKey(source) && map.containsKey(dest)) {
+            return map.get(source).getOrDefault(dest, -1);
         }
         return -1;
     }
@@ -172,13 +177,11 @@ public class Graph<T extends Comparable<T>> {
      * @param cost The cost to travel along the edge
      * @return True if the edge was added
      */
-    private boolean addEdgeInternal(Node<T> source, Node<T> dest, int cost) {
-        if(nodes.containsKey(source.getData()) && nodes.containsKey(dest.getData())) {
-            Map<Node<T>, Integer> map = edges.get(source);
-            if(!map.containsKey(dest)) {
-                map.put(dest, cost);
-                return true;
-            }
+    private boolean addEdgeInternal(T source, T dest, int cost) {
+        Map<T, Integer> edgeMap = map.get(source);
+        if(!edgeMap.containsKey(dest)) {
+            edgeMap.put(dest, cost);
+            return true;
         }
         return false;
     }
@@ -189,6 +192,15 @@ public class Graph<T extends Comparable<T>> {
      * @return The number of nodes in the graph
      */
     public int getNumberOfNodes() {
-        return nodes.keySet().size();
+        return map.keySet().size();
+    }
+
+    /**
+     * Gets the nodes from the graph
+     *
+     * @return The nodes from the graph
+     */
+    public Collection<T> getNodes() {
+        return map.keySet();
     }
 }
