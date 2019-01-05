@@ -1,206 +1,304 @@
 package com.foley.util.graph;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
+import java.util.Queue;
 import java.util.Set;
 
 /**
- * A collection of nodes and the edges connecting them
+ * A collection of vertices and the edges connecting them
  *
- * @param <T> The type of the graph
+ * @param <T> The type of data the vertices hold
  * @author Evan Foley
- * @version 26 Dec 2018
+ * @version 05 Jan 2019
  */
-public class Graph<T extends Comparable<T>> {
+public class Graph<T extends Comparable> {
+    private boolean isDirectional;
+    private T root;
     private Map<T, Map<T, Integer>> map;
-    private boolean isDirected;
 
     /**
-     * Creates a new graph
+     * Algorithms for graph searching
+     */
+    public enum SearchType {
+        BFS, DFS, DIJSKTRA, ASTAR;
+    }
+
+    /**
+     * Creates an empty non-directional graph
      */
     public Graph() {
-        map = new HashMap<>();
-        isDirected = false;
+        this(false);
     }
 
     /**
-     * Creates a new graph
+     * Creates an empty graph that is either directional or non-directional
      *
-     * @param isDirected True for a directed graph
+     * @param isDirectional true if the graph is directional
      */
-    public Graph(boolean isDirected) {
-        this();
-        this.isDirected = isDirected;
+    public Graph(boolean isDirectional) {
+        this(isDirectional, null);
     }
 
     /**
-     * Adds a node to the graph
+     * Creates a new graph that is either directional or non-directional with the specified root
      *
-     * @param t The node
-     * @return True if the node was added
+     * @param isDirectional true if the graph is directional
+     * @param root the root vertex
      */
-    public boolean addNode(T t) {
-        if(!map.containsKey(t)) {
-            // Add the edge entry for the node
-            map.put(t, new HashMap<>());
+    public Graph(boolean isDirectional, T root) {
+        this.isDirectional = isDirectional;
+        this.root = root;
+        this.map = new HashMap<>();
+        // Add the root to the map
+        map.put(root, new HashMap<>());
+    }
+
+    /**
+     * Returns true if the graph is directional
+     *
+     * @return true if the graph is directional
+     */
+    public boolean isDirectional() {
+        return isDirectional;
+    }
+
+    /**
+     * Sets the root of the graph
+     *
+     * @param root the root of the graph
+     */
+    public void setRoot(T root) {
+        // Add to graph if not already in graph
+        if(!map.containsKey(root)) {
+            map.put(root, new HashMap<>());
+        }
+        this.root = root;
+    }
+
+    /**
+     * Adds a vertex to the map if it's not already present
+     *
+     * @param vertex the vertex to add
+     * @return true if the vertex was added
+     */
+    public boolean addVertex(T vertex) {
+        if(!map.containsKey(vertex)) {
+            map.put(vertex, new HashMap<>());
             return true;
         }
         return false;
     }
 
     /**
-     * Removes a node from the graph
+     * Removes a vertex from the map
      *
-     * @param t The node to remove
-     * @return True if the node was removed
+     * @param vertex the vertex to remove
      */
-    public boolean removeNode(T t) {
-        if(map.containsKey(t)) {
-            // Remove the edge entry for the node
-            Set<T> set = map.get(t).keySet();
-            map.remove(t);
-            // Remove the edges to all nodes that were connected to the node
-            for(T nt : set) {
-                map.get(nt).remove(t);
+    public void removeVertex(T vertex) {
+        if(map.containsKey(vertex)) {
+            // Get all connected neighbors
+            Set<T> set = map.get(vertex).keySet();
+            // Remove the vertex from all neighbors
+            for(T neighbor : set) {
+                map.get(neighbor).remove(vertex);
             }
-            return true;
+            // Remove vertex from the graph
+            map.remove(vertex);
         }
-        return false;
-    }
-
-    /**
-     * Adds an edge to the graph. If graph is not directed, will also add the edge from the destination node
-     * to the source node. Will only return the result of adding the edge from the source to the destination
-     *
-     * @param source The source node
-     * @param dest The destination node
-     * @return True if the edge was added between source and dest
-     */
-    public boolean addEdge(T source, T dest) {
-        if(map.containsKey(source) && map.containsKey(dest)) {
-            boolean added = addEdgeInternal(source, dest, 1);
-            if (!isDirected) {
-                addEdgeInternal(dest, source, 1);
-            }
-            return added;
-        }
-        return false;
-    }
-
-    /**
-     * Adds an edge to the graph with the specified cost. If graph is not directed, will also add the edge from the
-     * destination node to the source node. Will only return the result of adding the edge from the source to the
-     * destination
-     *
-     * @param source The source node
-     * @param dest The destination node
-     * @param cost The cost to travel along the edge
-     * @return True if the edge was added between source and dest
-     */
-    public boolean addEdge(T source, T dest, int cost) {
-        if(map.containsKey(source) && map.containsKey(dest)) {
-            boolean added = addEdgeInternal(source, dest, cost);
-            if (!isDirected) {
-                addEdgeInternal(dest, source, cost);
-            }
-            return added;
-        }
-        return false;
-    }
-
-    /**
-     * Removes an edge from the graph
-     *
-     * @param source The source node
-     * @param dest The destination node
-     * @return True if the edge was removed
-     */
-    public boolean removeEdge(T source, T dest) {
-        if(map.containsKey(source) && map.containsKey(dest)) {
-            map.get(source).remove(dest);
-            if(!isDirected) {
-                map.get(dest).remove(source);
-            }
-            return true;
-        }
-        return false;
-    }
-
-    /**
-     * Determines if two nodes are adjacent to each other. Only determines if an edge starting from source goes 
-     * to dest. Will not test for the other direction.
-     * 
-     * @param source The source node
-     * @param dest The destination node
-     * @return True if the nodes are adjacent to each other
-     */
-    public boolean areAdjacent(T source, T dest) {
-        if(map.containsKey(source) && map.containsKey(dest)) {
-            return map.get(source).containsKey(dest);
-        }
-        return false;
-    }
-
-    /**
-     * Gets the nodes connected to the passed node
-     * @param t The node
-     * @return
-     */
-    public Collection<T> getNeighbors(T t) {
-        if(map.containsKey(t)) {
-            return map.get(t).keySet();
-        }
-        return new ArrayList<>();
-    }
-
-    /**
-     * Gets the cost to travel along an edge in the graph
-     *
-     * @param source The source node
-     * @param dest The destination node
-     * @return The cost to travel along the edge
-     */
-    public int getEdgeCost(T source, T dest) {
-        if(map.containsKey(source) && map.containsKey(dest)) {
-            return map.get(source).getOrDefault(dest, -1);
-        }
-        return -1;
     }
 
     /**
      * Adds an edge to the graph
      *
-     * @param source The source node
-     * @param dest The destination node
-     * @param cost The cost to travel along the edge
-     * @return True if the edge was added
+     * @param from the starting vertex
+     * @param to the ending vertex
+     * @return true if the edge was added to the graph
      */
-    private boolean addEdgeInternal(T source, T dest, int cost) {
-        Map<T, Integer> edgeMap = map.get(source);
-        if(!edgeMap.containsKey(dest)) {
-            edgeMap.put(dest, cost);
-            return true;
-        }
-        return false;
+    public boolean addEdge(T from, T to) {
+        return addEdge(from, to, 1);
     }
 
     /**
-     * Gets the number of nodes in the graph
+     * Adds an edge to the graph with the specified weight
      *
-     * @return The number of nodes in the graph
+     * @param from the starting vertex
+     * @param to the ending vertex
+     * @param weight the weight of the edge
+     * @return true if the edge was added to the graph
      */
-    public int getNumberOfNodes() {
+    public boolean addEdge(T from, T to, int weight) {
+        // If both vertices are not in the graph, error out
+        if(!map.containsKey(from) || !map.containsKey(to)) {
+            return false;
+        }
+        return addEdgeInternal(from, to, weight);
+    }
+
+    /**
+     * Removes an edge from the graph
+     *
+     * @param from the starting vertex
+     * @param to the ending vertex
+     */
+    public void removeEdge(T from, T to) {
+        // Proceed only if both vertices are in the graph
+        if(map.containsKey(from) && map.containsKey(to)) {
+            map.get(from).remove(to);
+            // If the graph is not directional, remove the other edge as well
+            if(!isDirectional) {
+                map.get(to).remove(from);
+            }
+        }
+    }
+
+    /**
+     * Adds an edge to the graph
+     *
+     * @param from the starting vertex
+     * @param to the ending vertex
+     * @param weight the weight of the edge
+     * @return true if the edge was added to the graph
+     */
+    private boolean addEdgeInternal(T from, T to, int weight) {
+        map.get(from).put(to, weight);
+        // If the graph is not directional, add the edge going the other way as well
+        if(!isDirectional) {
+            map.get(to).put(from, weight);
+        }
+        return true;
+    }
+
+    /**
+     * Returns the weight of the edge connecting the two vertices
+     *
+     * @param from the starting vertex
+     * @param to the ending vertex
+     * @return the weight of the edge connecting the two vertices
+     */
+    public int getEdgeWeight(T from, T to) {
+        // If starting vertex is not in the graph error out
+        if(!map.containsKey(from)) {
+            return 0;
+        }
+        return map.get(from).getOrDefault(to, 0);
+    }
+
+    /**
+     * Returns true if the two vertices are connected by an edge within the graph. Only tests one way connection
+     *
+     * @param from the starting vertex
+     * @param to the ending vertex
+     * @return true if the two vertices are connected by an edge
+     */
+    public boolean areAdjacent(T from, T to) {
+        if(!map.containsKey(from) || !map.containsKey(to)) {
+            return false;
+        }
+        return map.get(from).getOrDefault(to, 0) > 0;
+    }
+
+    /**
+     * Gets the vertices connected to the passed vertex
+     *
+     * @param vertex the vertex
+     * @return the vertices connected to the passed vertex
+     */
+    public Set<T> getNeighbors(T vertex) {
+        return map.getOrDefault(vertex, new HashMap<>()).keySet();
+    }
+
+    /**
+     * Gets the number of vertices in the graph
+     *
+     * @return the number of vertices in the graph
+     */
+    public int getNumberOfVertices() {
         return map.keySet().size();
     }
 
     /**
-     * Gets the nodes from the graph
+     * Gets the vertices that are in the graph
      *
-     * @return The nodes from the graph
+     * @return the vertices that are in the graph
      */
-    public Collection<T> getNodes() {
+    public Set<T> getVertices() {
         return map.keySet();
+    }
+
+    /**
+     * Searches a graph using the breadth first search algorithm
+     *
+     * @param <T> The type of the graph
+     */
+    private class BreadthFirstSearch<T extends Comparable> implements GraphSearch<T>{
+        Map<T, SearchNode<T>> nodes;
+
+        @Override
+        public void searchGraph(Graph<T> g, T from) {
+            // Prep and fill the node collection
+            nodes = new HashMap<>();
+            for(T t : g.getVertices()) {
+                nodes.put(t, new SearchNode(t));
+            }
+            // Verify the source vertex is in the graph
+            if(!nodes.containsKey(from)) {
+                throw new IllegalArgumentException("[CRITICAL] The specified vertex to search from does not exist in the graph");
+            }
+            // Set up search
+            Queue<SearchNode> q = new LinkedList<>();
+            SearchNode<T> current = nodes.get(from);
+            current.visited = true;
+            current.score = 0;
+            q.offer(current);
+
+            // Process until no more nodes remain queued
+            while(!q.isEmpty()) {
+                current = q.poll();
+
+                // Get and process all neighbors
+                T t = current.data;
+                for(T neighbor : g.getNeighbors(t)) {
+                    SearchNode<T> n = nodes.get(neighbor);
+                    if(!n.visited) {
+                        n.score = current.score + g.getEdgeWeight(current.data, neighbor);
+                        n.visited = true;
+                        q.offer(n);
+                    }
+                }
+            }
+        }
+
+        @Override
+        public int getPathCost(T to) {
+            if(!nodes.containsKey(to)) {
+                return -1;
+            }
+            return nodes.get(to).score;
+        }
+
+        @Override
+        public List<T> getPath(T to) {
+            return null;
+        }
+    }
+
+    private class SearchNode<T extends Comparable> implements Comparable<SearchNode<T>> {
+        T data;
+        boolean visited;
+        int score;
+        SearchNode prev;
+
+        public SearchNode(T data) {
+            this.data = data;
+            this.score = Integer.MAX_VALUE;
+        }
+
+        public int compareTo(SearchNode<T> n) {
+            return data.compareTo(n.data);
+        }
     }
 }
