@@ -16,6 +16,15 @@ public abstract class Pathfinder<E> implements Searchable<E>{
     protected Comparator<E> comp;
 
     /**
+     * Creates a new graph
+     *
+     * @param g the graph to search
+     */
+    public Pathfinder(Graph<E> g) {
+        this(g, null);
+    }
+
+    /**
      * Creates a new pathfinder
      *
      * @param g the graph to search

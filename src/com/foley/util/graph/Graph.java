@@ -17,6 +17,13 @@ public class Graph<E> {
     private Map<E, Map<E, Integer>> map;
 
     /**
+     * Creates a new non directional graph
+     */
+    public Graph() {
+        this(false);
+    }
+
+    /**
      * Creates a new graph
      *
      * @param directional true if the graph should be directional

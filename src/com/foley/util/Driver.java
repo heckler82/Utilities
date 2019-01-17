@@ -13,7 +13,7 @@ import java.awt.Point;
 public class Driver {
     public static void main(String[] args) {
         SimpleTimer timer = new SimpleTimer();
-        Graph<Integer> graph = new Graph<>(false);
+        Graph<Integer> graph = new Graph<>();
         // Add values to graph
         for(int i = 0; i < 9; i++) {
             graph.addVertex(i);
@@ -34,7 +34,7 @@ public class Driver {
         graph.addEdge(6, 8, 6);
         graph.addEdge(7, 8, 7);
 
-        Searchable<Integer> search = new DijkstraPathfinder<>(graph, null);
+        Searchable<Integer> search = new DijkstraPathfinder<>(graph);
         search.searchGraphFrom(0);
         System.out.println("=============================");
         System.out.println("STARTING NODE: 0");
@@ -58,7 +58,7 @@ public class Driver {
         timer.tick();
         timer.printTick();
 
-        Graph<Point> pGraph = new Graph<>(false);
+        Graph<Point> pGraph = new Graph<>();
         pGraph.addVertex(new Point(0, 0));
         pGraph.addVertex(new Point(0, 1));
         pGraph.addVertex(new Point(1, 1));

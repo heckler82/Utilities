@@ -15,6 +15,14 @@ public class DijkstraPathfinder<E> extends Pathfinder<E> {
      * Creates a new pathfinder utilizing dijkstra's algorithm
      *
      * @param g the graph to search
+     */
+    public DijkstraPathfinder(Graph<E> g) {
+        super(g);
+    }
+    /**
+     * Creates a new pathfinder utilizing dijkstra's algorithm
+     *
+     * @param g the graph to search
      * @param comp the comparator to use
      */
     public DijkstraPathfinder(Graph<E> g, Comparator<E> comp) {
@@ -47,7 +55,7 @@ public class DijkstraPathfinder<E> extends Pathfinder<E> {
         } else {
             // PriorityQueue requires Comparable for natural-ordering. Error out if condition is not met
             if(!(from instanceof Comparable)) {
-                throw new ClassCastException("Dijkstra must work on objects of type Comparable. If type is not Comparable, please provide a Comparator for sorting");
+                throw new IllegalStateException("Dijkstra must work on objects of type Comparable. If type is not Comparable, please provide a Comparator for sorting");
             }
             q = new PriorityQueue<>();
         }
