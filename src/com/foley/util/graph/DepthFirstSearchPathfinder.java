@@ -57,13 +57,17 @@ public class DepthFirstSearchPathfinder<E> extends Pathfinder<E> {
                 // Process neighbors
                 for(E e : g.getNeighbors(current)) {
                     SearchNode<E> neighbor = nodes.get(e);
-
+                    int newScore = node.getScore() + g.getEdgeCost(current, e);
                     // Add to stack if it hasn't been visited
                     if(!neighbor.isVisited()) {
-                        int newScore = node.getScore() + g.getEdgeCost(current, e);
                         neighbor.setScore(newScore);
                         neighbor.setParent(node);
                         s.push(e);
+                    } else {
+                        if(newScore < neighbor.getScore()) {
+                            neighbor.setScore(newScore);
+                            neighbor.setParent(node);
+                        }
                     }
                 }
             }

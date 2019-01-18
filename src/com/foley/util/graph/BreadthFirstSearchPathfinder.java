@@ -69,6 +69,11 @@ public class BreadthFirstSearchPathfinder<E> extends Pathfinder<E> {
                     neighbor.setParent(node);
                     neighbor.visit();
                     q.offer(e);
+                } else {
+                    if(newScore < neighbor.getScore()) {
+                        neighbor.setScore(newScore);
+                        neighbor.setParent(node);
+                    }
                 }
             }
         }
