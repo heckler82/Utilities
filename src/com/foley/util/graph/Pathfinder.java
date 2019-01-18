@@ -70,13 +70,43 @@ public abstract class Pathfinder<E> implements Searchable<E>{
         Path<E> path = new Path<>();
         // If the node exists, add steps until the root node is reached
         if(node != null) {
-            while(node.parent != null) {
+            while(node != null) {
                 path.addStep(node.data);
                 node = node.parent;
             }
         }
         // Return the resulting path (path may be empty)
         return path;
+    }
+
+    @Override
+    /**
+     * Prints out the search results to the console
+     */
+    public void printSearch() {
+        System.out.println(toString());
+    }
+
+    /**
+     * Returns a string representation of the search
+     *
+     * @return the string representation of the search
+     */
+    public String toString() {
+        StringBuilder build = new StringBuilder();
+        build.append("Search Results\n");
+        build.append("-------------------------------------------------------\n");
+        build.append("Node\t\tCost\t\tPath\n");
+        for(E e : g.getVertices()) {
+            build.append(e.toString() + "\t\t\t" + getPathCostTo(e) + "\t\t\t" + null);
+            Path<E> path = getPathTo(e);
+            for(E step : path) {
+                build.append(" -> " + step.toString());
+            }
+            build.append("\n");
+        }
+        build.append("-------------------------------------------------------\n");
+        return build.toString();
     }
 
     /**

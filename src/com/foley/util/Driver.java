@@ -28,26 +28,8 @@ public class Driver {
 
         Searchable<Integer> search = new DepthFirstSearchPathfinder<>(graph);
         search.searchGraphFrom(1);
-        System.out.println("DEPTH FIRST SEARCH");
-        System.out.println("=============================");
-        System.out.println("STARTING NODE: 1");
-        System.out.println("NODE\tDISTANCE");
-        for(int i = 0; i < graph.size(); i++) {
-            System.out.println((i + 1) + "\t\t" + search.getPathCostTo(i + 1));
-        }
-        System.out.println("=============================");
-
-        System.out.println("=============================");
-        System.out.println("STARTING NODE: 1");
-        for(int i = 0; i < graph.size(); i++) {
-            Path<Integer> path = search.getPathTo(i + 1);
-            System.out.print("DESTINATION NODE " + (i + 1) + ": 1");
-            for(int j : path) {
-                System.out.print(" -> " + j);
-            }
-            System.out.println();
-        }
-        System.out.println("=============================");
+        search.printSearch();
+        System.out.println();
 
         // Breadth first search
         graph = new Graph<>();
@@ -67,27 +49,8 @@ public class Driver {
 
         search = new BreadthFirstSearchPathfinder<>(graph);
         search.searchGraphFrom(0);
+        search.printSearch();
         System.out.println();
-        System.out.println("BREADTH FIRST SEARCH");
-        System.out.println("=============================");
-        System.out.println("STARTING NODE: 0");
-        System.out.println("NODE\tDISTANCE");
-        for(int i = 0; i < graph.size(); i++) {
-            System.out.println(i + "\t\t" + search.getPathCostTo(i));
-        }
-        System.out.println("=============================");
-
-        System.out.println("=============================");
-        System.out.println("STARTING NODE: 0");
-        for(int i = 0; i < graph.size(); i++) {
-            Path<Integer> path = search.getPathTo(i);
-            System.out.print("DESTINATION NODE " + i + ": 0");
-            for(int j : path) {
-                System.out.print(" -> " + j);
-            }
-            System.out.println();
-        }
-        System.out.println("=============================");
 
         // Dijkstra
         graph = new Graph<>();
@@ -113,27 +76,7 @@ public class Driver {
 
         search = new DijkstraPathfinder<>(graph);
         search.searchGraphFrom(0);
-        System.out.println();
-        System.out.println("DIJKSTRA SEARCH");
-        System.out.println("=============================");
-        System.out.println("STARTING NODE: 0");
-        System.out.println("NODE\tDISTANCE");
-        for(int i = 0; i < graph.size(); i++) {
-            System.out.println(i + "\t\t" + search.getPathCostTo(i));
-        }
-        System.out.println("=============================");
-
-        System.out.println("=============================");
-        System.out.println("STARTING NODE: 0");
-        for(int i = 0; i < graph.size(); i++) {
-            Path<Integer> path = search.getPathTo(i);
-            System.out.print("DESTINATION NODE " + i + ": 0");
-            for(int j : path) {
-                System.out.print(" -> " + j);
-            }
-            System.out.println();
-        }
-        System.out.println("=============================");
+        search.printSearch();
 
         timer.tick();
         timer.printTick();

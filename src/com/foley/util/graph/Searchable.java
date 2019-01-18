@@ -37,4 +37,9 @@ public interface Searchable<E> {
      * @return the path of vertices that lead to the target vertex
      */
     Path<E> getPathTo(E to);
+
+    /**
+     * Prints out the search results to the console
+     */
+    void printSearch();
 }
