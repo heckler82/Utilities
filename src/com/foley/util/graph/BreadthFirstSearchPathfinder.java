@@ -21,16 +21,6 @@ public class BreadthFirstSearchPathfinder<E> extends Pathfinder<E> {
 
     @Override
     /**
-     * Searches the graph from a source vertex to all other vertices
-     *
-     * @param from the vertex to search from
-     */
-    public void searchGraphFrom(E from) {
-        searchGraphTo(from, null);
-    }
-
-    @Override
-    /**
      * Searches the graph from a source vertex to a target vertex
      *
      * @param from the vertex to search from

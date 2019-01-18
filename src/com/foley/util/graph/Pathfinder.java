@@ -42,6 +42,16 @@ public abstract class Pathfinder<E> implements Searchable<E>{
 
     @Override
     /**
+     * Searches the graph from a source vertex to all other vertices
+     *
+     * @param from the vertex to search from
+     */
+    public void searchGraphFrom(E from) {
+        searchGraphTo(from, null);
+    }
+
+    @Override
+    /**
      * Returns the total cost to travel to a target vertex
      *
      * @param to the target vertex
