@@ -13,7 +13,84 @@ import java.awt.Point;
 public class Driver {
     public static void main(String[] args) {
         SimpleTimer timer = new SimpleTimer();
+
+        // Depth first search
         Graph<Integer> graph = new Graph<>();
+        // Add values to graph
+        for(int i = 1; i < 6; i++) {
+            graph.addVertex(i);
+        }
+        // Add edges
+        graph.addEdge(1, 2);
+        graph.addEdge(1, 3);
+        graph.addEdge(2, 4);
+        graph.addEdge(2, 5);
+
+        Searchable<Integer> search = new DepthFirstSearchPathfinder<>(graph);
+        search.searchGraphFrom(1);
+        System.out.println("DEPTH FIRST SEARCH");
+        System.out.println("=============================");
+        System.out.println("STARTING NODE: 1");
+        System.out.println("NODE\tDISTANCE");
+        for(int i = 0; i < graph.size(); i++) {
+            System.out.println((i + 1) + "\t\t" + search.getPathCostTo(i + 1));
+        }
+        System.out.println("=============================");
+
+        System.out.println("=============================");
+        System.out.println("STARTING NODE: 1");
+        for(int i = 0; i < graph.size(); i++) {
+            Path<Integer> path = search.getPathTo(i + 1);
+            System.out.print("DESTINATION NODE " + (i + 1) + ": 1");
+            for(int j : path) {
+                System.out.print(" -> " + j);
+            }
+            System.out.println();
+        }
+        System.out.println("=============================");
+
+        // Breadth first search
+        graph = new Graph<>();
+        // Add values to graph
+        for(int i = 0; i < 8; i++) {
+            graph.addVertex(i);
+        }
+        // Add edges
+        graph.addEdge(0, 1);
+        graph.addEdge(0, 2);
+        graph.addEdge(0, 3);
+        graph.addEdge(1, 4);
+        graph.addEdge(1, 5);
+        graph.addEdge(2, 6);
+        graph.addEdge(2, 7);
+        graph.addEdge(3, 7);
+
+        search = new BreadthFirstSearchPathfinder<>(graph);
+        search.searchGraphFrom(0);
+        System.out.println();
+        System.out.println("BREADTH FIRST SEARCH");
+        System.out.println("=============================");
+        System.out.println("STARTING NODE: 0");
+        System.out.println("NODE\tDISTANCE");
+        for(int i = 0; i < graph.size(); i++) {
+            System.out.println(i + "\t\t" + search.getPathCostTo(i));
+        }
+        System.out.println("=============================");
+
+        System.out.println("=============================");
+        System.out.println("STARTING NODE: 0");
+        for(int i = 0; i < graph.size(); i++) {
+            Path<Integer> path = search.getPathTo(i);
+            System.out.print("DESTINATION NODE " + i + ": 0");
+            for(int j : path) {
+                System.out.print(" -> " + j);
+            }
+            System.out.println();
+        }
+        System.out.println("=============================");
+
+        // Dijkstra
+        graph = new Graph<>();
         // Add values to graph
         for(int i = 0; i < 9; i++) {
             graph.addVertex(i);
@@ -34,19 +111,21 @@ public class Driver {
         graph.addEdge(6, 8, 6);
         graph.addEdge(7, 8, 7);
 
-        Searchable<Integer> search = new DijkstraPathfinder<>(graph);
+        search = new DijkstraPathfinder<>(graph);
         search.searchGraphFrom(0);
+        System.out.println();
+        System.out.println("DIJKSTRA SEARCH");
         System.out.println("=============================");
         System.out.println("STARTING NODE: 0");
         System.out.println("NODE\tDISTANCE");
-        for(int i = 0; i < 9; i++) {
+        for(int i = 0; i < graph.size(); i++) {
             System.out.println(i + "\t\t" + search.getPathCostTo(i));
         }
         System.out.println("=============================");
 
         System.out.println("=============================");
         System.out.println("STARTING NODE: 0");
-        for(int i = 0; i < 9; i++) {
+        for(int i = 0; i < graph.size(); i++) {
             Path<Integer> path = search.getPathTo(i);
             System.out.print("DESTINATION NODE " + i + ": 0");
             for(int j : path) {
@@ -55,43 +134,9 @@ public class Driver {
             System.out.println();
         }
         System.out.println("=============================");
+
         timer.tick();
         timer.printTick();
 
-        Graph<Point> pGraph = new Graph<>();
-        pGraph.addVertex(new Point(0, 0));
-        pGraph.addVertex(new Point(0, 1));
-        pGraph.addVertex(new Point(1, 1));
-        pGraph.addVertex(new Point(1, 0));
-
-        pGraph.addEdge(new Point(0, 0), new Point(0, 1), 5);
-        pGraph.addEdge(new Point(0, 1), new Point(1, 1), 11);
-        pGraph.addEdge(new Point(1, 1), new Point(1, 0), 5);
-        pGraph.addEdge(new Point(1, 0), new Point(0, 0), 10);
-        pGraph.addEdge(new Point(1, 0), new Point(0, 1), 4);
-        Searchable<Point> pSearch = new DijkstraPathfinder<>(pGraph, new PointComparator());
-        //Searchable<Point> pSearch = new DijkstraPathfinder<>(pGraph, null);
-        pSearch.searchGraphFrom(new Point(0, 0));
-        System.out.println("=============================");
-        System.out.println("STARTING NODE: 0, 0");
-        System.out.println("NODE\tDISTANCE");
-        for(Point p : pGraph.getVertices()) {
-            System.out.println(p.x + ", " + p.y + "\t\t" + pSearch.getPathCostTo(p));
-        }
-        System.out.println("=============================");
-
-        System.out.println("=============================");
-        System.out.println("STARTING NODE: 0, 0");
-        for(Point p : pGraph.getVertices()) {
-            Path<Point> path = pSearch.getPathTo(p);
-            System.out.print("DESTINATION NODE (" + p.x + ", " + p.y + "): (0, 0)");
-            for(Point p2 : path) {
-                System.out.print(" -> (" + p2.x + ", " + p2.y + ")");
-            }
-            System.out.println();
-        }
-        System.out.println("=============================");
-        timer.tick();
-        timer.printTick();
     }
 }

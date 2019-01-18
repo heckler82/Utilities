@@ -167,6 +167,15 @@ public class Graph<E> {
     }
 
     /**
+     * Returns the number of vertices in the graph
+     *
+     * @return the number of vertices in the graph
+     */
+    public int size() {
+        return map.size();
+    }
+
+    /**
      * Returns the vertices that are in the graph
      *
      * @return the vertices that are in the graph

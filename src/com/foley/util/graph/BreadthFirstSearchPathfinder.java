@@ -63,10 +63,10 @@ public class BreadthFirstSearchPathfinder<E> extends Pathfinder<E> {
             for(E e : g.getNeighbors(current)) {
                 SearchNode<E> neighbor = nodes.get(e);
                 int newScore = node.getScore() + g.getEdgeCost(current, e);
-                neighbor.setScore(newScore);
-                neighbor.setParent(node);
                 // Process neighbor if it has not been visited
                 if(!neighbor.isVisited()) {
+                    neighbor.setScore(newScore);
+                    neighbor.setParent(node);
                     neighbor.visit();
                     q.offer(e);
                 }
