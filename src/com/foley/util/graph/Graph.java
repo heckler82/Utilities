@@ -183,4 +183,33 @@ public class Graph<E> {
     public Set<E> getVertices() {
         return map.keySet();
     }
+
+    /**
+     * Prints out the graph to the console
+     */
+    public void printGraph() {
+        System.out.println(toString());
+    }
+
+    @Override
+    /**
+     * Returns a string representation of the graph
+     *
+     * @return the string representation of the graph
+     */
+    public String toString() {
+        StringBuilder build = new StringBuilder();
+        build.append("Graph\n");
+        build.append("-------------------------------------------------------\n");
+        build.append("Node\t\t\tNeighbor\t\t\tCost\n");
+        for(E e : map.keySet()) {
+            build.append(e.toString());
+            Map<E, Integer> connected = map.get(e);
+            for(E conn : connected.keySet()) {
+                build.append("\t\t\t\t" + conn.toString() + "\t\t\t\t\t" + connected.get(conn) + "\n");
+            }
+        }
+        build.append("-------------------------------------------------------\n");
+        return build.toString();
+    }
 }

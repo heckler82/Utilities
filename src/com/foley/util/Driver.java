@@ -26,6 +26,8 @@ public class Driver {
         graph.addEdge(2, 4);
         graph.addEdge(2, 5);
 
+        graph.printGraph();
+
         Searchable<Integer> search = new DepthFirstSearchPathfinder<>(graph);
         search.searchGraphFrom(1);
         search.printSearch();
