@@ -123,7 +123,7 @@ public class Graph<E> {
         if(!map.containsKey(from) || !map.containsKey(to)) {
             throw new IllegalArgumentException("Cannot get cost for an edge between vertices that aren't in the graph");
         }
-        return map.get(from).get(to);
+        return map.get(from).getOrDefault(to, -1);
     }
 
     /**
