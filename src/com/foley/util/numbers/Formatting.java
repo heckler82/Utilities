@@ -1,4 +1,4 @@
-package com.foley.util;
+package com.foley.util.numbers;
 
 /**
  * Provides various utility methods for formatting data
@@ -19,5 +19,17 @@ public class Formatting {
             newArray[i] = Integer.parseInt(arr[i]);
         }
         return newArray;
+    }
+
+    /**
+     * Splits a string into individual values and converts it to an int array
+     *
+     * @param str The string to split
+     * @param delimeter The delimeter to split on
+     * @return A new array of integers
+     */
+    public static int[] convertToIntArray(String str, String delimeter) {
+        String[] split = str.split(delimeter);
+        return convertToIntArray(split);
     }
 }
